@@ -29,7 +29,7 @@ class Product extends Model
 
     public function orderItems(): HasMany
     {
-        return $this->hasMany(Order_Item::class);
+        return $this->hasMany(OrderItem::class);
     }
 
     public function reviews(): HasMany
