@@ -15,6 +15,122 @@ class AuthController extends Controller
 
 
     #[OA\Post(
+        path: '/api/login',
+        operationId: 'loginUser',
+        tags: ['Authentication'],
+        summary: 'Login and get API token',
+        description: 'Authenticate user and return an API token for protected endpoints',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['email', 'password'],
+                properties: [
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'admin@example.com'),
+                    new OA\Property(property: 'password', type: 'string', format: 'password', example: 'password'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Login successful',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Login successful'),
+                        new OA\Property(property: 'token', type: 'string', example: '1|abc123def456...'),
+                        new OA\Property(property: 'user', ref: '#/components/schemas/User'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Invalid credentials',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'Invalid credentials'),
+                    ]
+                )
+            ),
+        ]
+    )]
+public function login(Request $request)
+     {
+         $validator = Validator::make($request->all(), [
+             'email' => 'required|email',
+             'password' => 'required',
+         ]);
+
+         if ($validator->fails()) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'Validation Error',
+                 'errors' => $validator->errors(),
+             ], 422);
+         }
+
+         $user = User::where('email', $request->email)->first();
+
+         if (!$user || !Hash::check($request->password, $user->password)) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'Invalid credentials',
+             ], 401);
+         }
+
+         $token = $user->createToken('API Token')->plainTextToken;
+
+         return response()->json([
+             'success' => true,
+             'message' => 'Login successful',
+             'token' => $token,
+             'user' => $user,
+         ]);
+     }
+
+    public function adminLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials',
+            ], 401);
+        }
+
+        if ($user->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to access this area.',
+            ], 403);
+        }
+
+        $token = $user->createToken('Admin API Token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Admin login successful',
+            'token' => $token,
+            'user' => $user,
+        ]);
+    }
+
+    #[OA\Post(
         path: '/api/register',
         operationId: 'registerUser',
         tags: ['Authentication'],
@@ -86,50 +202,11 @@ class AuthController extends Controller
 
         $token = $user->createToken('API Token')->plainTextToken;
 
-        return response()->json([
+return response()->json([
             'success' => true,
             'message' => 'Register Successfully',
             'token' => $token,
             'user' => $user,
         ], 201);
-    }
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }
