@@ -54,13 +54,13 @@
                                     <a href="{{ route('admin.products.edit', $product) }}" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="inline" onsubmit="return confirm('Are you sure?');">
+                                    <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="inline delete-form-{{ $product->id }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-semibold">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
                                     </form>
+                                    <button type="button" class="delete-product-btn text-red-600 hover:text-red-800 text-sm font-semibold" data-product-name="{{ $product->name }}" data-product-id="{{ $product->id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -82,3 +82,102 @@
         {{ $products->links() }}
     </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteButtons = document.querySelectorAll('.delete-product-btn');
+    const modal = document.getElementById('delete-modal');
+    const modalProductName = document.getElementById('modal-product-name');
+    const confirmButton = document.getElementById('confirm-delete-btn');
+    const cancelButton = document.getElementById('cancel-delete-btn');
+    let deleteForm = null;
+
+    // Create modal if not exists
+    if (!modal) {
+        const modalHtml = `
+            <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800">Delete Product</h3>
+                        </div>
+                        <p class="text-gray-600 mb-6">
+                            Are you sure you want to delete the product <span id="modal-product-name" class="font-semibold text-gray-800"></span>? This action cannot be undone.
+                        </p>
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" id="cancel-delete-btn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition font-medium">
+                                Cancel
+                            </button>
+                            <button type="button" id="confirm-delete-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium">
+                                Delete Product
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    const modalEl = document.getElementById('delete-modal');
+    
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const productId = this.dataset.productId;
+            deleteForm = document.querySelector('.delete-form-' + productId);
+            const productName = this.dataset.productName;
+            document.getElementById('modal-product-name').textContent = productName;
+            modalEl.style.display = 'flex';
+        });
+    });
+
+    document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+        if (deleteForm) {
+            deleteForm.submit();
+        }
+    });
+
+    document.getElementById('cancel-delete-btn').addEventListener('click', function() {
+        modalEl.style.display = 'none';
+        deleteForm = null;
+    });
+
+    modalEl.addEventListener('click', function(e) {
+        if (e.target === modalEl) {
+            modalEl.style.display = 'none';
+            deleteForm = null;
+        }
+    });
+});
+</script>
+@endpush
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
+        <div class="p-6">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Delete Product</h3>
+            </div>
+            <p class="text-gray-600 mb-6">
+                Are you sure you want to delete the product <span id="modal-product-name" class="font-semibold text-gray-800"></span>? This action cannot be undone.
+            </p>
+            <div class="flex justify-end space-x-3">
+                <button type="button" id="cancel-delete-btn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition font-medium">
+                    Cancel
+                </button>
+                <button type="button" id="confirm-delete-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium">
+                    Delete Product
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
