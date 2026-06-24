@@ -23,8 +23,8 @@
                 @if($product->image)
                 <div>
                     <h4 class="text-sm font-semibold text-gray-700 mb-3">Product Image</h4>
-                    <img src="{{ asset('storage/' . $product->image) }}" 
-                         class="w-full h-48 object-cover rounded-lg" alt="{{ $product->name }}">
+                    <img src="{{ $product->image_url }}" 
+                        class="w-full h-48 object-cover rounded-lg" alt="{{ $product->name }}">
                 </div>
                 @endif
 

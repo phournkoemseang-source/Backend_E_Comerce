@@ -12,32 +12,29 @@ use App\Http\Controllers\Api\AuthController;
 Route::post('/register', [AuthController::class, 'register'])->name('api.register');
 Route::post('/admin/login', [AuthController::class, 'adminLogin'])->name('api.admin.login');
 
-
 Route::get('/products', [ProductController::class, 'index'])->name('api.products.index');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('api.products.show');
 
-
 Route::get('/categories', [CategoryController::class, 'index'])->name('api.categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('api.categories.show');
-
 
 // User profile route
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-
 // ============================================
 // PROTECTED API ROUTES (Requires Authentication + Admin Role)
 // ============================================
 Route::middleware(['auth:sanctum', 'api.admin'])->group(function () {
+    // Admin logout
+    Route::post('/admin/logout', [AuthController::class, 'adminLogout'])->name('api.admin.logout');
     // Products CRUD (Admin only)
     Route::post('/products', [ProductController::class, 'store'])->name('api.products.store');
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('api.products.update');
     Route::patch('/products/{product}', [ProductController::class, 'update'])->name('api.products.patch');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('api.products.destroy');
 
-    
     // Categories CRUD (Admin only)
     Route::post('/categories', [CategoryController::class, 'store'])->name('api.categories.store');
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('api.categories.update');

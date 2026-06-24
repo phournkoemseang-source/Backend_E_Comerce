@@ -209,4 +209,56 @@ return response()->json([
             'user' => $user,
         ], 201);
     }
+
+    #[OA\Post(
+        path: '/api/admin/logout',
+        operationId: 'adminLogout',
+        tags: ['Authentication'],
+        summary: 'Logout an admin user',
+        description: 'Revoke the current admin API token',
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Logout successful',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Admin logged out successfully'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated',
+            ),
+        ]
+    )]
+    public function adminLogout(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated',
+            ], 401);
+        }
+
+        if ($user->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to perform this action.',
+            ], 403);
+        }
+
+        $currentToken = $user->currentAccessToken();
+        if ($currentToken) {
+            $currentToken->delete();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Admin logged out successfully',
+        ]);
+    }
 }

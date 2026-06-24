@@ -17,6 +17,10 @@ class Product extends Model
         'image',
     ];
 
+    protected $appends = [
+        'image_url',
+    ];
+
     protected $casts = [
         'price' => 'decimal:2',
         'stock' => 'integer',
@@ -35,5 +39,14 @@ class Product extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (empty($this->image)) {
+            return null;
+        }
+
+        return asset('storage/' . ltrim($this->image, '/'));
     }
 }
