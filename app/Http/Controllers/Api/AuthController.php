@@ -79,30 +79,13 @@ public function login(Request $request)
              ], 401);
          }
 
-         $token = $user->createToken('API Token')->plainTextToken;
-
-         return response()->json([
-             'success' => true,
-             'message' => 'Login successful',
-             'token' => $token,
-             'user' => $user,
-         ]);
-     }
-
-    public function adminLogin(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        if ($validator->fails()) {
+        if ($user->role !== 'user') {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation Error',
-                'errors' => $validator->errors(),
-            ], 422);
+                'message' => 'Please use the admin login endpoint for admin accounts.',
+            ], 403);
         }
+
 
         $user = User::where('email', $request->email)->first();
 
@@ -176,6 +159,10 @@ public function login(Request $request)
     )]
     public function register(Request $request)
     {
+        if (!$request->filled('password_confirmation') && $request->filled('password_confirm')) {
+            $request->merge(['password_confirmation' => $request->input('password_confirm')]);
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -198,11 +185,12 @@ public function login(Request $request)
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'user',
         ]);
 
         $token = $user->createToken('API Token')->plainTextToken;
 
-return response()->json([
+        return response()->json([
             'success' => true,
             'message' => 'Register Successfully',
             'token' => $token,

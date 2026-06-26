@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductWebController;
 use App\Http\Controllers\Admin\CategoryWebController;
@@ -11,6 +12,19 @@ use App\Http\Controllers\Admin\CategoryWebController;
 // ============================================
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/login', [UserAuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [UserAuthController::class, 'login'])->name('login.post');
+Route::get('/register', [UserAuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [UserAuthController::class, 'register'])->name('register.post');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
 });
 
 // ============================================
