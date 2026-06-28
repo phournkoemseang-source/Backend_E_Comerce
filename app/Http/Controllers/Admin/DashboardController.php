@@ -18,6 +18,8 @@ class DashboardController extends Controller
             'total_orders' => Order::count(),
             'total_users' => User::where('role', 'user')->count(),
             'total_revenue' => Order::sum('total_amount') ?? 0,
+            'ordered_users' => Order::distinct('user_id')->count('user_id'),
+            'paid_users' => Order::whereIn('status', ['processing', 'completed', 'shipped'])->distinct('user_id')->count('user_id'),
         ];
 
         $recent_products = Product::latest()->take(5)->get();

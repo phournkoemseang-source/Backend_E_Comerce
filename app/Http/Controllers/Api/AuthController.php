@@ -168,8 +168,7 @@ public function login(Request $request)
             'email' => 'required|email|unique:users,email',
             'password' => [
                 'required',
-                'confirmed',
-                Password::min(8),
+                Password::min(6),
             ],
         ]);
 
@@ -247,6 +246,76 @@ public function login(Request $request)
         return response()->json([
             'success' => true,
             'message' => 'Admin logged out successfully',
+        ]);
+    }
+
+    public function profile(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'user' => $request->user(),
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        // Check if updating password
+        if ($request->has('new_password')) {
+            $validator = Validator::make($request->all(), [
+                'current_password' => 'required',
+                'new_password' => ['required', 'confirmed', Password::min(6)],
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation Error',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Current password does not match.',
+                ], 422);
+            }
+
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password updated successfully.',
+                'user' => $user,
+            ]);
+        }
+
+        // Updating basic profile
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully.',
+            'user' => $user,
         ]);
     }
 }

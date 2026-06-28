@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with('items.product.category')
-            ->where('user_id', auth()->id())
-            ->orderBy('created_at', 'desc')
+        $orders = $request->user()->orders()
+            ->with(['items.product'])
+            ->latest()
             ->get();
 
         return response()->json([
@@ -43,6 +43,68 @@ class OrderController extends Controller
             'success' => true,
             'data' => $order,
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric|min:0',
+            'shipping_address' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        $subtotal = 0;
+        foreach ($request->items as $item) {
+            $subtotal += $item['price'] * $item['quantity'];
+        }
+        $shipping = $subtotal > 0 ? 12.50 : 0;
+        $tax = $subtotal * 0.08;
+        $total_amount = $subtotal + $shipping + $tax;
+
+        try {
+            $order = DB::transaction(function () use ($user, $total_amount, $request) {
+                $order = Order::create([
+                    'user_id' => $user->id,
+                    'total_amount' => $total_amount,
+                    'status' => 'pending',
+                    'shipping_address' => $request->shipping_address,
+                ]);
+
+                foreach ($request->items as $item) {
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $item['product_id'],
+                        'quantity' => $item['quantity'],
+                        'price' => $item['price'],
+                    ]);
+                }
+
+                return $order;
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order placed successfully',
+                'data' => $order->load('items.product'),
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to place order. Please try again.',
+            ], 500);
+        }
     }
 
     public function checkout(Request $request)
@@ -98,11 +160,8 @@ class OrderController extends Controller
 
             DB::commit();
 
-            $order->load('items.product.category');
-
             return response()->json([
                 'success' => true,
-                'message' => 'Order placed successfully',
                 'data' => $order,
             ], 201);
         } catch (\Exception $e) {

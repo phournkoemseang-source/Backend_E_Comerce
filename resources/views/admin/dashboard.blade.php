@@ -5,74 +5,100 @@
 
 @section('content')
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 mb-8">
         <!-- Total Products -->
-        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm">Total Products</p>
-                    <p class="text-3xl font-bold text-gray-800">{{ $stats['total_products'] }}</p>
+                    <p class="text-gray-600 text-xs">Total Products</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ $stats['total_products'] }}</p>
                 </div>
-                <div class="bg-blue-100 rounded-full p-3">
-                    <i class="fas fa-box text-blue-600 text-2xl"></i>
+                <div class="bg-blue-100 rounded-full p-2">
+                    <i class="fas fa-box text-blue-600 text-xl"></i>
                 </div>
             </div>
-            <a href="{{ route('admin.products.index') }}" class="text-blue-600 text-sm mt-4 inline-block hover:underline">
+            <a href="{{ route('admin.products.index') }}" class="text-blue-600 text-xs mt-3 inline-block hover:underline">
                 View Products →
             </a>
         </div>
 
         <!-- Total Categories -->
-        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm">Total Categories</p>
-                    <p class="text-3xl font-bold text-gray-800">{{ $stats['total_categories'] }}</p>
+                    <p class="text-gray-600 text-xs">Total Categories</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ $stats['total_categories'] }}</p>
                 </div>
-                <div class="bg-green-100 rounded-full p-3">
-                    <i class="fas fa-list text-green-600 text-2xl"></i>
+                <div class="bg-green-100 rounded-full p-2">
+                    <i class="fas fa-list text-green-600 text-xl"></i>
                 </div>
             </div>
-            <a href="{{ route('admin.categories.index') }}" class="text-green-600 text-sm mt-4 inline-block hover:underline">
+            <a href="{{ route('admin.categories.index') }}" class="text-green-600 text-xs mt-3 inline-block hover:underline">
                 View Categories →
             </a>
         </div>
 
         <!-- Total Orders -->
-        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm">Total Orders</p>
-                    <p class="text-3xl font-bold text-gray-800">{{ $stats['total_orders'] }}</p>
+                    <p class="text-gray-600 text-xs">Total Orders</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ $stats['total_orders'] }}</p>
                 </div>
-                <div class="bg-purple-100 rounded-full p-3">
-                    <i class="fas fa-shopping-cart text-purple-600 text-2xl"></i>
+                <div class="bg-purple-100 rounded-full p-2">
+                    <i class="fas fa-shopping-cart text-purple-600 text-xl"></i>
                 </div>
             </div>
         </div>
 
         <!-- Total Users -->
-        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm">Total Users</p>
-                    <p class="text-3xl font-bold text-gray-800">{{ $stats['total_users'] }}</p>
+                    <p class="text-gray-600 text-xs">Total Users</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ $stats['total_users'] }}</p>
                 </div>
-                <div class="bg-yellow-100 rounded-full p-3">
-                    <i class="fas fa-users text-yellow-600 text-2xl"></i>
+                <div class="bg-yellow-100 rounded-full p-2">
+                    <i class="fas fa-users text-yellow-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Who Ordered -->
+        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs">Users Ordered</p>
+                    <p class="text-2xl font-bold text-indigo-600">{{ $stats['ordered_users'] }}</p>
+                </div>
+                <div class="bg-indigo-100 rounded-full p-2">
+                    <i class="fas fa-user-tag text-indigo-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Who Paid -->
+        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs">Users Paid</p>
+                    <p class="text-2xl font-bold text-teal-600">{{ $stats['paid_users'] }}</p>
+                </div>
+                <div class="bg-teal-100 rounded-full p-2">
+                    <i class="fas fa-receipt text-teal-600 text-xl"></i>
                 </div>
             </div>
         </div>
 
         <!-- Total Revenue -->
-        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm">Total Revenue</p>
-                    <p class="text-3xl font-bold text-green-600">${{ number_format($stats['total_revenue'], 2) }}</p>
+                    <p class="text-gray-600 text-xs">Total Revenue</p>
+                    <p class="text-2xl font-bold text-green-600">${{ number_format($stats['total_revenue'], 2) }}</p>
                 </div>
-                <div class="bg-red-100 rounded-full p-3">
-                    <i class="fas fa-dollar-sign text-red-600 text-2xl"></i>
+                <div class="bg-red-100 rounded-full p-2">
+                    <i class="fas fa-dollar-sign text-red-600 text-xl"></i>
                 </div>
             </div>
         </div>

@@ -27,15 +27,22 @@ Route::get('/categories/{category}', [CategoryController::class, 'show'])->name(
 Route::get('/reviews', [ReviewController::class, 'index'])->name('api.reviews.index');
 Route::get('/reviews/{id}', [ReviewController::class, 'show'])->name('api.reviews.show');
 
-// User profile route
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
 // ============================================
-// PROTECTED API ROUTES (Requires Authentication) - Cart, Wishlist, Orders
+// PROTECTED API ROUTES (Requires Authentication)
 // ============================================
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    Route::get('/profile', [AuthController::class, 'profile'])->name('api.profile');
+    Route::put('/profile', [AuthController::class, 'updateProfile'])->name('api.profile.update');
+
+    // Orders
+    Route::get('/orders', [OrderController::class, 'index'])->name('api.orders.index');
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('api.orders.show');
+    Route::post('/checkout', [OrderController::class, 'store'])->name('api.checkout.store');
+
     // Cart
     Route::get('/cart', [CartController::class, 'index'])->name('api.cart.index');
     Route::post('/cart', [CartController::class, 'store'])->name('api.cart.store');
@@ -46,13 +53,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('api.wishlist.index');
     Route::post('/wishlist', [WishlistController::class, 'store'])->name('api.wishlist.store');
     Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->name('api.wishlist.destroy');
-
-    // Orders
-    Route::get('/orders', [OrderController::class, 'index'])->name('api.orders.index');
-    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('api.orders.show');
-
-    // Checkout
-    Route::post('/checkout', [OrderController::class, 'checkout'])->name('api.checkout');
 
     // Reviews (authenticated write)
     Route::post('/reviews', [ReviewController::class, 'store'])->name('api.reviews.store');
@@ -66,6 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'api.admin'])->group(function () {
     // Admin logout
     Route::post('/admin/logout', [AuthController::class, 'adminLogout'])->name('api.admin.logout');
+
     // Products CRUD (Admin only)
     Route::post('/products', [ProductController::class, 'store'])->name('api.products.store');
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('api.products.update');
