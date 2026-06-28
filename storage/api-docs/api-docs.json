@@ -4,7 +4,7 @@
         "title": "My API Documentation",
         "description": "API documentation for my Laravel application",
         "contact": {
-            "email": "admin@example.com"
+            "email": "contact@example.com"
         },
         "license": {
             "name": "MIT",
@@ -51,12 +51,12 @@
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "password123"
+                                        "example": "********"
                                     },
                                     "password_confirmation": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "password123"
+                                        "example": "********"
                                     }
                                 },
                                 "type": "object"

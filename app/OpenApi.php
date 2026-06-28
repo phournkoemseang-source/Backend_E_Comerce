@@ -8,7 +8,7 @@ use OpenApi\Attributes as OA;
     version: '1.0.0',
     title: 'My API Documentation',
     description: 'API documentation for my Laravel application',
-    contact: new OA\Contact(email: 'admin@example.com'),
+    contact: new OA\Contact(email: 'contact@example.com'),
     license: new OA\License(name: 'MIT', url: 'https://opensource.org/licenses/MIT')
 )]
 #[OA\Server(

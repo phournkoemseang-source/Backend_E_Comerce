@@ -73,20 +73,7 @@ GET    /admin/categories/{id}           Show products in category
 
 
 ═══════════════════════════════════════════════════════════════════════════════
-                              ADMIN CREDENTIALS
-═══════════════════════════════════════════════════════════════════════════════
-
-Email:    admin@example.com
-Password: password
-
-Alternative test user:
-Email:    user@example.com
-Password: password
-(This user cannot access admin routes)
-
-
-═══════════════════════════════════════════════════════════════════════════════
-                           POSTMAN COLLECTION IMPORT
+                            POSTMAN COLLECTION IMPORT
 ═══════════════════════════════════════════════════════════════════════════════
 
 1. Open Postman
@@ -219,8 +206,8 @@ Products: 25 (5 per category)
   - Sports & Outdoors Product 1-5
 
 Users: 2
-  - Admin User (admin@example.com)
-  - Regular User (user@example.com)
+  - Admin User
+  - Regular User
 
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -273,9 +260,7 @@ Start server:
   php artisan serve
 
 Login to dashboard:
-  http://localhost:8000/admin/login
-  Email: admin@example.com
-  Password: password
+   http://localhost:8000/admin/login
 
 Import Postman collection:
   POSTMAN_COLLECTION.json
