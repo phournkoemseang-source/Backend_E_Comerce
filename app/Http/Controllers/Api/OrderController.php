@@ -7,15 +7,37 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use OpenApi\Attributes as OA;
 
 class OrderController extends Controller
 {
+    #[OA\Get(
+        path: '/api/orders',
+        operationId: 'listOrders',
+        tags: ['Orders'],
+        summary: 'List user orders',
+        description: 'Get all orders for the authenticated user',
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Orders retrieved',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/Order')),
+                    ]
+                )
+            ),
+        ]
+    )]
     public function index()
     {
         $orders = Order::with('items.product.category')
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -25,10 +47,34 @@ class OrderController extends Controller
         ]);
     }
 
+    #[OA\Get(
+        path: '/api/orders/{id}',
+        operationId: 'showOrder',
+        tags: ['Orders'],
+        summary: 'Get order details',
+        description: 'Get detailed information about a specific order',
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, description: 'Order ID', schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Order retrieved',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/Order'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 404, description: 'Order not found'),
+        ]
+    )]
     public function show(string $id)
     {
         $order = Order::with('items.product.category')
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::id())
             ->where('id', $id)
             ->first();
 
@@ -45,6 +91,39 @@ class OrderController extends Controller
         ]);
     }
 
+    #[OA\Post(
+        path: '/api/checkout',
+        operationId: 'checkout',
+        tags: ['Orders'],
+        summary: 'Checkout and place order',
+        description: 'Place an order from the authenticated user\'s cart items',
+        security: [['sanctum' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['shipping_address'],
+                properties: [
+                    new OA\Property(property: 'shipping_address', type: 'string', example: '123 Main St, Phnom Penh'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Order placed successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Order placed successfully'),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/Order'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 400, description: 'Cart is empty'),
+            new OA\Response(response: 422, description: 'Validation error'),
+            new OA\Response(response: 500, description: 'Failed to place order'),
+        ]
+    )]
     public function checkout(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -59,7 +138,7 @@ class OrderController extends Controller
             ], 422);
         }
 
-        $userId = auth()->id();
+        $userId = Auth::id();
         $cartItems = Cart::with('product')
             ->where('user_id', $userId)
             ->get();

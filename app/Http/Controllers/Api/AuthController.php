@@ -55,6 +55,47 @@ class AuthController extends Controller
             ),
         ]
     )]
+    #[OA\Post(
+        path: '/api/admin/login',
+        operationId: 'adminLogin',
+        tags: ['Authentication'],
+        summary: 'Admin login',
+        description: 'Authenticate admin user and return an API token',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['email', 'password'],
+                properties: [
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'admin@example.com'),
+                    new OA\Property(property: 'password', type: 'string', format: 'password', example: 'password'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Admin login successful',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Admin login successful'),
+                        new OA\Property(property: 'token', type: 'string', example: '1|abc123def456...'),
+                        new OA\Property(property: 'user', ref: '#/components/schemas/User'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Invalid credentials',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'Invalid credentials'),
+                    ]
+                )
+            ),
+        ]
+    )]
 public function login(Request $request)
      {
          $validator = Validator::make($request->all(), [
