@@ -18,14 +18,14 @@
 <body class="bg-gray-50">
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white shadow-xl">
+        <aside class="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white shadow-xl flex flex-col">
             <div class="p-6 border-b border-blue-700">
                 <h1 class="text-2xl font-bold flex items-center">
                     <i class="fas fa-crown mr-3"></i>Admin Panel
                 </h1>
             </div>
 
-            <nav class="mt-6">
+            <nav class="mt-6 flex-1">
                 <a href="{{ route('admin.dashboard') }}" 
                    class="block px-6 py-3 hover:bg-blue-700 transition {{ request()->routeIs('admin.dashboard') ? 'bg-blue-700 border-l-4 border-white' : '' }}">
                     <i class="fas fa-chart-line mr-3"></i>Dashboard
@@ -39,6 +39,16 @@
                     <i class="fas fa-list mr-3"></i>Categories
                 </a>
             </nav>
+            <div class="p-6 border-t border-blue-700">
+                <a href="{{ route('admin.logout') }}" 
+                   class="block px-6 py-3 hover:bg-blue-700 transition text-red-300 hover:text-red-200"
+                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <i class="fas fa-sign-out-alt mr-3"></i>Logout
+                </a>
+                <form id="logout-form" method="POST" action="{{ route('admin.logout') }}" class="hidden">
+                    @csrf
+                </form>
+            </div>
         </aside>
 
         <!-- Main Content -->
@@ -52,12 +62,6 @@
                         <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
                             {{ substr(auth()->user()->name, 0, 1) }}
                         </div>
-                        <form method="POST" action="{{ route('admin.logout') }}" class="inline">
-                            @csrf
-                            <button type="submit" class="text-red-600 hover:text-red-800 transition">
-                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                            </button>
-                        </form>
                     </div>
                 </div>
             </header>

@@ -13,7 +13,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-   use HasApiTokens;
+    use HasApiTokens;
     /**
      * The attributes that are mass assignable.
      *
@@ -60,7 +60,7 @@ class User extends Authenticatable
         return $this->hasMany(Wishlist::class);
     }
 
-    public function orders(): HasMany
+    public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Order::class);
     }

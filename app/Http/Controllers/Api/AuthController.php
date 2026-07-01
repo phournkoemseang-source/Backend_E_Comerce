@@ -13,7 +13,6 @@ use OpenApi\Attributes as OA;
 class AuthController extends Controller
 {
 
-
     #[OA\Post(
         path: '/api/login',
         operationId: 'loginUser',
@@ -25,8 +24,8 @@ class AuthController extends Controller
             content: new OA\JsonContent(
                 required: ['email', 'password'],
                 properties: [
-                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'admin@example.com'),
-                    new OA\Property(property: 'password', type: 'string', format: 'password', example: 'password'),
+new OA\Property(property: 'email', type: 'string', format: 'email', example: 'user@example.com'),
+                     new OA\Property(property: 'password', type: 'string', format: 'password', example: '********'),
                 ]
             )
         ),
@@ -55,6 +54,47 @@ class AuthController extends Controller
             ),
         ]
     )]
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials',
+            ], 401);
+        }
+
+        if ($user->role !== 'user') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please use the admin login endpoint for admin accounts.',
+            ], 403);
+        }
+
+        $token = $user->createToken('API Token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'token' => $token,
+            'user' => $user,
+        ]);
+    }
+
     #[OA\Post(
         path: '/api/admin/login',
         operationId: 'adminLogin',
@@ -96,37 +136,20 @@ class AuthController extends Controller
             ),
         ]
     )]
-public function login(Request $request)
-     {
-         $validator = Validator::make($request->all(), [
-             'email' => 'required|email',
-             'password' => 'required',
-         ]);
+    public function adminLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-         if ($validator->fails()) {
-             return response()->json([
-                 'success' => false,
-                 'message' => 'Validation Error',
-                 'errors' => $validator->errors(),
-             ], 422);
-         }
-
-         $user = User::where('email', $request->email)->first();
-
-         if (!$user || !Hash::check($request->password, $user->password)) {
-             return response()->json([
-                 'success' => false,
-                 'message' => 'Invalid credentials',
-             ], 401);
-         }
-
-        if ($user->role !== 'user') {
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Please use the admin login endpoint for admin accounts.',
-            ], 403);
+                'message' => 'Validation Error',
+                'errors' => $validator->errors(),
+            ], 422);
         }
-
 
         $user = User::where('email', $request->email)->first();
 
@@ -209,8 +232,7 @@ public function login(Request $request)
             'email' => 'required|email|unique:users,email',
             'password' => [
                 'required',
-                'confirmed',
-                Password::min(8),
+                Password::min(6),
             ],
         ]);
 
@@ -288,6 +310,76 @@ public function login(Request $request)
         return response()->json([
             'success' => true,
             'message' => 'Admin logged out successfully',
+        ]);
+    }
+
+    public function profile(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'user' => $request->user(),
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        // Check if updating password
+        if ($request->has('new_password')) {
+            $validator = Validator::make($request->all(), [
+                'current_password' => 'required',
+                'new_password' => ['required', 'confirmed', Password::min(6)],
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation Error',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Current password does not match.',
+                ], 422);
+            }
+
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password updated successfully.',
+                'user' => $user,
+            ]);
+        }
+
+        // Updating basic profile
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully.',
+            'user' => $user,
         ]);
     }
 }
