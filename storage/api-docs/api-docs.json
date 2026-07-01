@@ -40,12 +40,12 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "admin@example.com"
+                                        "example": "user@example.com"
                                     },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "password"
+                                        "example": "********"
                                     }
                                 },
                                 "type": "object"
@@ -221,12 +221,12 @@
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "********"
+                                        "example": "password123"
                                     },
                                     "password_confirmation": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "********"
+                                        "example": "password123"
                                     }
                                 },
                                 "type": "object"
