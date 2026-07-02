@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.env.*
+.dockerignore
+Dockerfile
+node_modules
+npm-debug.log
+vendor
+.idea
+.vscode
+*.md
+.gitattributes
