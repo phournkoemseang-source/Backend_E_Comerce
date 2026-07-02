@@ -6,8 +6,6 @@
   "deploy": {
     "numReplicas": 1,
     "startCommand": "php-fpm",
-    "preDeployCommand": "php artisan migrate --force",
-    "healthcheckPath": "/",
-    "healthcheckTimeout": 300
+    "preDeployCommand": "php artisan migrate --force"
   }
 }
