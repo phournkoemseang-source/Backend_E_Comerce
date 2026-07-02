@@ -1,0 +1,13 @@
+{
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "startCommand": "php-fpm",
+    "preDeployCommand": "php artisan migrate --force",
+    "healthcheckPath": "/api/products",
+    "healthcheckTimeout": 300
+  }
+}
