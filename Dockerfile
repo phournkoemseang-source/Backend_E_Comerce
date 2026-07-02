@@ -1,7 +1,7 @@
 # Stage 1: Build dependencies
 FROM php:8.2-fpm-alpine AS builder
 
-# Install system dependencies
+# Install build dependencies
 RUN apk add --no-cache \
     zip \
     libzip-dev \
@@ -15,7 +15,7 @@ RUN apk add --no-cache \
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
+    && docker-php-ext-install \
     pdo \
     pdo_mysql \
     bcmath \
@@ -36,15 +36,13 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-script
 # Stage 2: Final Production Image
 FROM php:8.2-fpm-alpine
 
-# Install runtime dependencies
+# Install runtime dependencies only
 RUN apk add --no-cache \
     libpng \
     libjpeg-turbo \
     freetype \
     zip \
-    curl \
-    nginx \
-    supervisor
+    curl
 
 # Copy PHP extensions from builder
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
@@ -55,15 +53,15 @@ COPY --from=builder /app /var/www/html
 
 WORKDIR /var/www/html
 
-# Create storage link and cache config (with correct PHP version)
-RUN mkdir -p /var/www/html/storage/framework/cache/data \
-    && mkdir -p /var/www/html/storage/framework/sessions \
-    && mkdir -p /var/www/html/storage/framework/views \
-    && mkdir -p /var/www/html/storage/logs \
-    && chmod -R 775 /var/www/html/storage \
-    && chmod -R 775 /var/www/html/bootstrap/cache
+# Set up Laravel storage directories with proper permissions
+RUN mkdir -p storage/framework/cache/data \
+    && mkdir -p storage/framework/sessions \
+    && mkdir -p storage/framework/views \
+    && mkdir -p storage/logs \
+    && chmod -R 775 storage \
+    && chmod -R 775 bootstrap/cache
 
-# Expose port
+# Expose port (Railway provides its own HTTP proxy)
 EXPOSE 8080
 
 # Start PHP-FPM
